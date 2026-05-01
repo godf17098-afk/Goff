@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บาร์ย่าง — Staff Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --surface: #111111;
+    --card: #161616;
+    --card2: #1e1e1e;
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --text: #f0ede8;
+    --muted: #6b6560;
+    --dim: #3a3530;
+    --border: #222222;
+    --green: #3a7d52;
+    --green2: #4caf70;
+    --red: #c0392b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Kanit',sans-serif; font-weight:300; min-height:100vh; }
+
+  /* LOGIN */
+  .login-screen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem;
+    background: radial-gradient(ellipse at 50% 40%, rgba(201,168,76,0.05) 0%, transparent 60%);
+  }
+  .login-box {
+    background:var(--surface); border:1px solid var(--border);
+    padding:3rem 2.5rem; width:100%; max-width:380px; text-align:center;
+    position:relative;
+  }
+  .login-box::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+  .login-eyebrow { font-size:0.6rem; letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); margin-bottom:0.75rem; }
+  .login-title { font-size:1.6rem; font-weight:600; margin-bottom:0.4rem; }
+  .login-sub { font-size:0.78rem; color:var(--muted); margin-bottom:2rem; letter-spacing:0.05em; }
+  .login-field { margin-bottom:1rem; text-align:left; }
+  .login-field label { display:block; font-size:0.62rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); margin-bottom:0.4rem; }
+  .login-field input { width:100%; padding:0.75rem 1rem; background:var(--card); border:1px solid var(--border); color:var(--text); font-family:'Kanit',sans-serif; font-size:0.9rem; font-weight:300; outline:none; transition:border-color 0.2s; }
+  .login-field input:focus { border-color:var(--dim); }
+  .login-btn { width:100%; padding:0.9rem; background:var(--gold); border:none; color:#000; font-family:'Kanit',sans-serif; font-weight:600; font-size:0.85rem; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; margin-top:0.5rem; transition:background 0.2s; }
+  .login-btn:hover { background:var(--gold2); }
+  .login-error { font-size:0.78rem; color:#e74c3c; margin-top:0.75rem; display:none; }
+
+  /* MAIN APP */
+  .app { display:none; }
+
+  /* HEADER */
+  header { position:sticky; top:0; z-index:100; background:rgba(8,8,8,0.97); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 1.75rem; display:flex; align-items:center; justify-content:space-between; height:62px; }
+  .logo { font-family:'Kanit',sans-serif; font-size:1.2rem; font-weight:600; letter-spacing:0.08em; color:var(--gold); }
+  .logo-sub { font-size:0.55rem; letter-spacing:0.3em; color:var(--muted); text-transform:uppercase; display:block; margin-top:-2px; }
+  .header-right { display:flex; align-items:center; gap:1rem; }
+  .staff-name { font-size:0.75rem; color:var(--muted); letter-spacing:0.05em; }
+  .logout-btn { background:transparent; border:1px solid var(--dim); color:var(--muted); cursor:pointer; padding:0.3rem 0.8rem; font-family:'Kanit',sans-serif; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; transition:all 0.2s; }
+  .logout-btn:hover { border-color:var(--red); color:var(--red); }
+
+  /* STATS BAR */
+  .stats-bar { display:flex; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .stats-bar::-webkit-scrollbar { display:none; }
+  .stat-card { flex:1; min-width:120px; padding:1.25rem 1.5rem; border-right:1px solid var(--border); cursor:pointer; transition:background 0.2s; }
+  .stat-card:last-child { border-right:none; }
+  .stat-card:hover { background:var(--surface); }
+  .stat-card.active { background:rgba(201,168,76,0.05); }
+  .stat-count { font-size:1.75rem; font-weight:600; color:var(--gold); line-height:1; }
+  .stat-label { font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-top:0.3rem; }
+
+  /* TOOLBAR */
+  .toolbar { display:flex; align-items:center; gap:1rem; padding:1rem 1.75rem; border-bottom:1px solid var(--border); }
+  .search-staff { flex:1; display:flex; align-items:center; gap:0.6rem; background:var(--surface); border:1px solid var(--border); padding:0.55rem 0.85rem; }
+  .search-staff input { flex:1; background:none; border:none; outline:none; color:var(--text); font-family:'Kanit',sans-serif; font-size:0.85rem; font-weight:300; }
+  .search-staff input::placeholder { color:var(--muted); }
+  .refresh-btn { padding:0.55rem 1rem; background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer; font-family:'Kanit',sans-serif; font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase; transition:all 0.2s; white-space:nowrap; display:flex; align-items:center; gap:0.4rem; }
+  .refresh-btn:hover { border-color:var(--gold); color:var(--gold); }
+  .auto-badge { font-size:0.6rem; background:rgba(201,168,76,0.15); color:var(--gold); padding:0.15rem 0.4rem; border:1px solid rgba(201,168,76,0.3); }
+
+  /* ORDER LIST */
+  .orders-container { padding:1.75rem; }
+  .empty-state { text-align:center; padding:5rem 1rem; color:var(--muted); }
+  .empty-icon { font-size:2.5rem; opacity:0.15; display:block; margin-bottom:1rem; }
+  .empty-text { font-size:0.85rem; letter-spacing:0.1em; }
+
+  .order-row {
+    background:var(--card); border:1px solid var(--border);
+    margin-bottom:1px; position:relative; transition:background 0.2s;
+    animation:slideIn 0.3s ease both;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+  .order-row:hover { background:var(--card2); }
+  .order-row.status-3 { opacity:0.5; }
+
+  .order-top { display:flex; align-items:center; gap:1rem; padding:1rem 1.25rem; cursor:pointer; }
+  .order-status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .dot-0 { background:var(--muted); }
+  .dot-1 { background:#e67e22; animation:blink 1.5s infinite; }
+  .dot-2 { background:#3498db; animation:blink 1.5s infinite; }
+  .dot-3 { background:var(--green); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .order-id-col { font-size:0.88rem; font-weight:600; color:var(--gold); letter-spacing:0.06em; min-width:120px; }
+  .order-customer { flex:1; }
+  .order-cust-name { font-size:0.85rem; font-weight:500; }
+  .order-cust-detail { font-size:0.72rem; color:var(--muted); margin-top:0.1rem; letter-spacing:0.03em; }
+  .order-total { font-size:0.95rem; font-weight:600; color:var(--gold); text-align:right; min-width:80px; }
+  .order-total-label { font-size:0.62rem; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; }
+  .order-time-col { font-size:0.72rem; color:var(--muted); text-align:right; min-width:60px; }
+  .order-chevron { color:var(--muted); font-size:0.8rem; transition:transform 0.2s; }
+  .order-row.expanded .order-chevron { transform:rotate(180deg); }
+
+  /* STATUS BADGE */
+  .status-badge { padding:0.2rem 0.65rem; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; border:1px solid; font-weight:600; min-width:90px; text-align:center; flex-shrink:0; }
+  .badge-0 { color:var(--muted); border-color:var(--dim); background:rgba(58,53,48,0.3); }
+  .badge-1 { color:#e67e22; border-color:rgba(230,126,34,0.4); background:rgba(230,126,34,0.08); }
+  .badge-2 { color:#3498db; border-color:rgba(52,152,219,0.4); background:rgba(52,152,219,0.08); }
+  .badge-3 { color:var(--green2); border-color:rgba(76,175,112,0.4); background:rgba(76,175,112,0.08); }
+
+  /* ORDER DETAIL */
+  .order-detail { border-top:1px solid var(--border); padding:1rem 1.25rem 1.25rem; display:none; }
+  .order-row.expanded .order-detail { display:block; }
+
+  .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem; }
+  .detail-item label { font-size:0.6rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:0.2rem; }
+  .detail-item span { font-size:0.82rem; color:var(--text); line-height:1.4; }
+
+  .items-list { background:var(--bg); padding:0.75rem 1rem; margin-bottom:1.25rem; border:1px solid var(--border); }
+  .items-label { font-size:0.6rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; }
+  .items-text { font-size:0.82rem; color:var(--text); line-height:1.7; }
+
+  /* STATUS ACTIONS */
+  .status-actions { display:flex; gap:1px; }
+  .status-btn {
+    flex:1; padding:0.75rem 0.5rem; border:1px solid var(--border);
+    background:var(--bg); color:var(--muted); cursor:pointer;
+    font-family:'Kanit',sans-serif; font-size:0.72rem; font-weight:500;
+    letter-spacing:0.08em; text-transform:uppercase; text-align:center;
+    transition:all 0.2s; position:relative;
+  }
+  .status-btn .btn-icon { display:block; font-size:1.1rem; margin-bottom:0.3rem; }
+  .status-btn:hover { border-color:var(--dim); color:var(--text); background:var(--surface); }
+  .status-btn.current { background:rgba(201,168,76,0.1); border-color:var(--gold); color:var(--gold); }
+  .status-btn.done-state { background:rgba(76,175,112,0.08); border-color:rgba(76,175,112,0.3); color:var(--green2); }
+  .status-btn:disabled { opacity:0.3; cursor:not-allowed; }
+  .status-btn .step-num { position:absolute; top:0.4rem; right:0.5rem; font-size:0.6rem; color:var(--muted); }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:1.75rem; left:50%; transform:translateX(-50%) translateY(60px); background:var(--card); border:1px solid var(--border); color:var(--text); padding:0.65rem 1.25rem; font-size:0.78rem; letter-spacing:0.05em; z-index:600; transition:transform 0.3s ease; white-space:nowrap; display:flex; align-items:center; gap:0.5rem; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  .toast-dot { width:5px; height:5px; background:var(--green2); border-radius:50%; flex-shrink:0; }
+
+  /* LIVE INDICATOR */
+  .live-dot { width:6px; height:6px; background:var(--green2); border-radius:50%; display:inline-block; animation:blink 1.5s infinite; margin-right:0.3rem; }
+
+  ::-webkit-scrollbar { width:3px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--dim); }
+
+  @media(max-width:600px) {
+    .detail-grid { grid-template-columns:1fr; }
+    .order-total, .order-time-col { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-eyebrow">Staff Access</div>
+    <div class="login-title">บาร์ย่าง</div>
+    <div class="login-sub">ระบบจัดการออเดอร์สำหรับพนักงาน</div>
+    <div class="login-field">
+      <label>ชื่อผู้ใช้</label>
+      <input type="text" id="loginUser" placeholder="staff / manager" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>รหัสผ่าน</label>
+      <input type="password" id="loginPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div class="login-error" id="loginError">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+    <div style="margin-top:1.5rem;font-size:0.68rem;color:var(--muted);letter-spacing:0.05em;line-height:1.7">
+      Demo: staff / 1234 &nbsp;|&nbsp; manager / admin
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="appScreen">
+
+  <header>
+    <div class="logo">บาร์ย่าง <span class="logo-sub">Staff Portal</span></div>
+    <div class="header-right">
+      <span class="staff-name"><span class="live-dot"></span><span id="staffNameDisplay">พนักงาน</span></span>
+      <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card active" onclick="setFilter('all',this)">
+      <div class="stat-count" id="cnt-all">0</div>
+      <div class="stat-label">ทั้งหมด</div>
+    </div>
+    <div class="stat-card" onclick="setFilter('0',this)">
+      <div class="stat-count" id="cnt-0">0</div>
+      <div class="stat-label">รอยืนยัน</div>
+    </div>
+    <div class="stat-card" onclick="setFilter('1',this)">
+      <div class="stat-count" id="cnt-1">0</div>
+      <div class="stat-label">กำลังทำ</div>
+    </div>
+    <div class="stat-card" onclick="setFilter('2',this)">
+      <div class="stat-count" id="cnt-2">0</div>
+      <div class="stat-label">กำลังส่ง</div>
+    </div>
+    <div class="stat-card" onclick="setFilter('3',this)">
+      <div class="stat-count" id="cnt-3">0</div>
+      <div class="stat-label">ส่งแล้ว</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-staff">
+      <span style="color:var(--muted);font-size:0.9rem">⌕</span>
+      <input type="text" placeholder="ค้นหาออเดอร์ หรือชื่อลูกค้า..." id="searchStaff" oninput="renderOrders()">
+    </div>
+    <button class="refresh-btn" onclick="loadAndRender()">
+      ↻ รีเฟรช <span class="auto-badge">AUTO</span>
+    </button>
+  </div>
+
+  <!-- ORDER LIST -->
+  <div class="orders-container" id="ordersContainer"></div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg">อัปเดตแล้ว</span></div>
+
+<script>
+const ACCOUNTS = { staff:'1234', manager:'admin' };
+const STATUS_LABELS = ['รอยืนยัน','กำลังทำอาหาร','กำลังจัดส่ง','จัดส่งแล้ว'];
+const STATUS_ICONS = ['📋','👨‍🍳','🛵','✅'];
+const STATUS_NEXT = ['ยืนยันออเดอร์','เริ่มทำอาหาร','ส่งออเดอร์','เสร็จสิ้น'];
+
+let orders = [];
+let currentFilter = 'all';
+let expandedId = null;
+let currentUser = null;
+
+// ── AUTH ──
+function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  if (ACCOUNTS[user] && ACCOUNTS[user] === pass) {
+    currentUser = user;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    document.getElementById('staffNameDisplay').textContent = user === 'manager' ? 'ผู้จัดการ' : 'พนักงาน';
+    loadAndRender();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+function doLogout() {
+  currentUser = null;
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+// ── DATA ──
+function loadOrders() {
+  try {
+    const raw = localStorage.getItem('baryang_orders');
+    orders = raw ? JSON.parse(raw).map(o => ({ ...o, time: new Date(o.time) })) : [];
+  } catch(e) { orders = []; }
+}
+function saveOrders() {
+  localStorage.setItem('baryang_orders', JSON.stringify(orders.map(o => ({ ...o, time: o.time.toISOString() }))));
+}
+function loadAndRender() { loadOrders(); renderOrders(); updateStats(); }
+
+// ── FILTER ──
+function setFilter(val, el) {
+  currentFilter = val;
+  document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderOrders();
+}
+
+// ── STATS ──
+function updateStats() {
+  document.getElementById('cnt-all').textContent = orders.length;
+  [0,1,2,3].forEach(s => {
+    document.getElementById(`cnt-${s}`).textContent = orders.filter(o => o.status === s).length;
+  });
+}
+
+// ── RENDER ──
+function renderOrders() {
+  const q = document.getElementById('searchStaff').value.trim().toLowerCase();
+  let list = orders;
+  if (currentFilter !== 'all') list = list.filter(o => o.status === parseInt(currentFilter));
+  if (q) list = list.filter(o => o.id.toLowerCase().includes(q) || (o.name||'').toLowerCase().includes(q));
+
+  const el = document.getElementById('ordersContainer');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><span class="empty-icon">◯</span><span class="empty-text">ไม่มีออเดอร์ในขณะนี้</span></div>`;
+    return;
+  }
+  el.innerHTML = list.map(order => buildOrderRow(order)).join('');
+  // re-expand if needed
+  if (expandedId) {
+    const row = el.querySelector(`[data-id="${expandedId}"]`);
+    if (row) row.classList.add('expanded');
+  }
+}
+
+function buildOrderRow(order) {
+  const t = order.time;
+  const timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+  const badgeClass = `badge-${order.status}`;
+  const dotClass = `dot-${order.status}`;
+  const isExp = expandedId === order.id;
+
+  const stepsHtml = [0,1,2,3].map(i => {
+    let cls = 'status-btn';
+    if (i < order.status) cls += ' done-state';
+    else if (i === order.status) cls += ' current';
+    const disabled = i !== order.status ? 'disabled' : '';
+    return `<button class="${cls}" ${disabled} onclick="updateStatus('${order.id}',${i+1})">
+      <span class="btn-icon">${STATUS_ICONS[i]}</span>
+      <span class="step-num">${i+1}</span>
+      ${i < order.status ? '✓ ' : ''}${STATUS_NEXT[i]}
+    </button>`;
+  }).join('');
+
+  const paymentMap = { promptpay:'พร้อมเพย์', cod:'เก็บเงินปลายทาง', card:'บัตรเครดิต' };
+
+  return `<div class="order-row${isExp?' expanded':''}" data-id="${order.id}">
+    <div class="order-top" onclick="toggleExpand('${order.id}')">
+      <div class="order-status-dot ${dotClass}"></div>
+      <div class="order-id-col">${order.id}</div>
+      <div class="order-customer">
+        <div class="order-cust-name">${order.name || 'ไม่ระบุ'}</div>
+        <div class="order-cust-detail">${order.phone || ''}</div>
+      </div>
+      <div class="status-badge ${badgeClass}">${STATUS_LABELS[order.status]}</div>
+      <div class="order-total">
+        <div class="order-total-label">ยอดรวม</div>
+        ฿${(order.total||0).toLocaleString()}
+      </div>
+      <div class="order-time-col">${timeStr} น.</div>
+      <div class="order-chevron">▾</div>
+    </div>
+    <div class="order-detail">
+      <div class="detail-grid">
+        <div class="detail-item"><label>ชื่อลูกค้า</label><span>${order.name || '-'}</span></div>
+        <div class="detail-item"><label>เบอร์โทร</label><span>${order.phone || '-'}</span></div>
+        <div class="detail-item"><label>ที่อยู่จัดส่ง</label><span>${order.address || '-'}</span></div>
+        <div class="detail-item"><label>ช่องทางชำระ</label><span>${paymentMap[order.payment] || order.payment || '-'}</span></div>
+        <div class="detail-item"><label>เวลาสั่ง</label><span>${timeStr} น.</span></div>
+        <div class="detail-item"><label>ยอดรวม</label><span style="color:var(--gold);font-weight:600">฿${(order.total||0).toLocaleString()}</span></div>
+      </div>
+      <div class="items-list">
+        <div class="items-label">รายการอาหาร</div>
+        <div class="items-text">${order.items || '-'}</div>
+      </div>
+      <div style="font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem">อัปเดตสถานะ</div>
+      <div class="status-actions">${stepsHtml}</div>
+    </div>
+  </div>`;
+}
+
+function toggleExpand(id) {
+  expandedId = expandedId === id ? null : id;
+  renderOrders();
+}
+
+// ── UPDATE STATUS ──
+function updateStatus(id, newStatus) {
+  const order = orders.find(o => o.id === id);
+  if (!order) return;
+  if (newStatus > 4) return;
+  order.status = newStatus;
+  saveOrders();
+  updateStats();
+  renderOrders();
+  const labels = ['','ยืนยันแล้ว','กำลังทำอาหาร','กำลังจัดส่ง','จัดส่งสำเร็จ'];
+  showToast(`${id} → ${labels[newStatus]}`);
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast'); t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── AUTO REFRESH (listen for changes from customer site) ──
+window.addEventListener('storage', e => {
+  if (e.key === 'baryang_orders') loadAndRender();
+});
+
+// Auto-refresh every 10s
+setInterval(loadAndRender, 10000);
+</script>
+</body>
+</html>
